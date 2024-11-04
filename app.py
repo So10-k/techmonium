@@ -155,9 +155,8 @@ def admin_panel():
 @app.route('/subscriptions')
 def subscriptions():
     plans = [
-        {'name': 'Basic Plan', 'price': '$10/month'},
-        {'name': 'Pro Plan', 'price': '$20/month'},
-        {'name': 'Enterprise Plan', 'price': '$50/month'}
+        {'name': 'Platinum Plan', 'price': '$20/month'},
+        {'name': 'Family Plan', 'price': 'CONTACT SAM TO PURCHASE'},
     ]
     return render_template('subscriptions.html', plans=plans)
 
