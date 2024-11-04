@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>User Hub</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome, {{ username }}!</h1>
+        <p><a href="{{ url_for('logout') }}">Logout</a></p>
+        {% if user.is_admin %}
+        <p><a href="{{ url_for('admin_panel') }}">Admin Panel</a></p>
+        {% endif %}
+        <h2>Your Subscription</h2>
+        <p>{{ user.subscription_plan or 'No subscription plan purchased' }}</p>
+        {% if user.subscription_plan %}
+        <p><a href="{{ url_for(user.subscription_plan|lower|replace(' ', '_')) }}">Go to {{ user.subscription_plan }}</a></p>
+        {% endif %}
+        <h2>Your Alerts</h2>
+        <p>{{ user.alert_message or 'No alerts' }}</p>
+        <h2>Your Order History</h2>
+        <pre>{{ user.order_history or 'No order history' }}</pre>
+    </div>
+</body>
+</html>

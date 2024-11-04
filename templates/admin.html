@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Panel</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Admin Panel</h1>
+        <div class="list-group">
+            <a href="{{ url_for('manage_users') }}" class="list-group-item list-group-item-action">Manage Users</a>
+            <a href="{{ url_for('manage_content') }}" class="list-group-item list-group-item-action">Manage Content</a>
+            <a href="{{ url_for('view_requests') }}" class="list-group-item list-group-item-action">View Requests</a>
+            <a href="{{ url_for('generate_invoice') }}" class="list-group-item list-group-item-action">Generate Invoice</a>
+        </div>
+    </div>
+</body>
+</html>

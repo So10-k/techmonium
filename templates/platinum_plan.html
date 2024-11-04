@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Platinum Plan</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Platinum Plan</h1>
+        <p>Welcome to the Platinum Plan exclusive content!</p>
+        <form action="{{ url_for('cancel_request') }}" method="post">
+            <input type="hidden" name="plan" value="Platinum Plan">
+            <button type="submit" class="btn btn-danger">Request Cancellation</button>
+        </form>
+    </div>
+</body>
+</html>

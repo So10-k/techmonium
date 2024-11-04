@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Manage Content</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Manage Content</h1>
+        <form action="/admin/manage_content" method="post">
+            <div class="form-group">
+                <label for="new_text">Website Text</label>
+                <textarea class="form-control" id="new_text" name="new_text" rows="10">{{ current_text }}</textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Update Text</button>
+        </form>
+    </div>
+</body>
+</html>

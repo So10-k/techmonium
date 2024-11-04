@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Generate Invoice</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <script>
+        function calculateTotal() {
+            let items = document.querySelectorAll('.item');
+            let prices = document.querySelectorAll('.price');
+            let discounts = document.querySelectorAll('.discount');
+            let subtotal = 0;
+            for (let i = 0; i < items.length; i++) {
+                let price = parseFloat(prices[i].value) || 0;
+                let discount = parseFloat(discounts[i].value) || 0;
+                subtotal += price - discount;
+            }
+            let tax = subtotal * 0.0635;
+            let total = subtotal + tax;
+            document.getElementById('subtotal').innerText = subtotal.toFixed(2);
+            document.getElementById('tax').innerText = tax.toFixed(2);
+            document.getElementById('total').innerText = total.toFixed(2);
+        }
+
+        function addItem() {
+            const itemIndex = document.querySelectorAll('.item').length + 1;
+            const itemDiv = document.createElement('div');
+            itemDiv.classList.add('form-group');
+            itemDiv.innerHTML = `
+                <label for="item${itemIndex}">Item ${itemIndex}</label>
+                <input type="text" class="form-control item" id="item${itemIndex}" name="items[]" required>
+                <label for="price${itemIndex}">Price</label>
+                <input type="number" class="form-control price" id="price${itemIndex}" name="prices[]" required>
+                <label for="discount${itemIndex}">Discount</label>
+                <input type="number" class="form-control discount" id="discount${itemIndex}" name="discounts[]" required>
+            `;
+            document.getElementById('items').appendChild(itemDiv);
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Generate Invoice</h1>
+        <form action="/admin/generate_invoice" method="post" oninput="calculateTotal()">
+            <div class="form-group">
+                <label for="user_id">Select User</label>
+                <select class="form-control" id="user_id" name="user_id" required>
+                    {% for user in users %}
+                    <option value="{{ user.id }}">{{ user.username }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div id="items">
+                <div class="form-group">
+                    <label for="item1">Item 1</label>
+                    <input type="text" class="form-control item" id="item1" name="items[]" required>
+                    <label for="price1">Price</label>
+                    <input type="number" class="form-control price" id="price1" name="prices[]" required>
+                    <label for="discount1">Discount</label>
+                    <input type="number" class="form-control discount" id="discount1" name="discounts[]" required>
+                </div>
+            </div>
+            <button type="button" class="btn btn-secondary" onclick="addItem()">Add Item</button>
+            <h3>Summary</h3>
+            <p>Subtotal: $<span id="subtotal">0.00</span></p>
+            <p>Tax (6.35%): $<span id="tax">0.00</span></p>
+            <p>Total: $<span id="total">0.00</span></p>
+            <button type="submit" class="btn btn-primary">Generate Invoice</button>
+        </form>
+    </div>
+</body>
+</html>

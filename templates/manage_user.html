@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Manage User</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Manage User: {{ user.username }}</h1>
+        <form action="/admin/manage_user/{{ user.id }}" method="post">
+            <input type="hidden" name="action" value="update_user">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" class="form-control" id="username" name="username" value="{{ user.username }}" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" class="form-control" id="email" name="email" value="{{ user.email }}" required>
+            </div>
+            <div class="form-group">
+                <label for="subscription_plan">Subscription Plan</label>
+                <select name="subscription_plan" class="form-control" required>
+                    <option value="No Plan Purchased" {% if user.subscription_plan == 'No Plan Purchased' %}selected{% endif %}>No Plan Purchased</option>
+                    <option value="Platinum Plan" {% if user.subscription_plan == 'Platinum Plan' %}selected{% endif %}>Platinum Plan</option>
+                    <option value="Family Plan" {% if user.subscription_plan == 'Family Plan' %}selected{% endif %}>Family Plan</option>
+                    <option value="Testing Plan" {% if user.subscription_plan == 'Testing Plan' %}selected{% endif %}>Testing Plan</option>
+                    <option value="Employee" {% if user.subscription_plan == 'Employee' %}selected{% endif %}>Employee</option>
+                    <option value="Friend" {% if user.subscription_plan == 'Friend' %}selected{% endif %}>Friend</option>
+                </select>
+            </div>
+            <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="is_admin" name="is_admin" {% if user.is_admin %}checked{% endif %}>
+                <label class="form-check-label" for="is_admin">Admin</label>
+            </div>
+            <button type="submit" class="btn btn-primary">Update User</button>
+        </form>
+        <h2>Order History</h2>
+        <form action="/admin/manage_user/{{ user.id }}" method="post">
+            <input type="hidden" name="action" value="update_order_history">
+            <div class="form-group">
+                <label for="order_history">Order History</label>
+                <textarea class="form-control" id="order_history" name="order_history" rows="10">{{ user.order_history }}</textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Update Order History</button>
+        </form>
+    </div>
+</body>
+</html>

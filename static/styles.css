@@ -1,0 +1,23 @@
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f8f9fa;
+}
+
+.navbar {
+    margin-bottom: 20px;
+}
+
+h1, h2 {
+    color: #343a40;
+}
+
+.container {
+    max-width: 800px;
+    margin: auto;
+}
+
+pre {
+    background-color: #e9ecef;
+    padding: 15px;
+    border-radius: 5px;
+}
