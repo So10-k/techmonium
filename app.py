@@ -354,4 +354,5 @@ if __name__ == '__main__':
             owner_user.set_password('10')
             db.session.add(owner_user)
             db.session.commit()
-    socketio.run(app, debug=True)
+    socketio.run(app, host='0.0.0.0', port=5000)
+    
