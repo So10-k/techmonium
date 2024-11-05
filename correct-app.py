@@ -6,6 +6,7 @@ from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 import uuid
 import io
+from datetime import datetime
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your_secret_key'
@@ -23,24 +24,45 @@ class User(db.Model):
     subscription_plan = db.Column(db.String(200), nullable=True)
     order_history = db.Column(db.Text, nullable=True)
     one_time_token = db.Column(db.String(200), nullable=True)
+    private_notes = db.Column(db.Text, nullable=True)  # New field for private notes
+    public_notes = db.Column(db.Text, nullable=True)   # New field for public notes
 
     def set_password(self, password):
         self.password = generate_password_hash(password)
 
     def check_password(self, password):
         return check_password_hash(self.password, password)
-
+    
 class Request(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), nullable=False)
     email = db.Column(db.String(120), nullable=False)
     password = db.Column(db.String(200), nullable=False)
     plan = db.Column(db.String(200), nullable=False)
+class Availability(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    date = db.Column(db.Date, nullable=False)
+    start_time = db.Column(db.Time, nullable=False)
+    end_time = db.Column(db.Time, nullable=False)
+    is_booked = db.Column(db.Boolean, default=False)
+    bookings = db.relationship('Booking', backref='availability', lazy=True)
 
+class Booking(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    availability_id = db.Column(db.Integer, db.ForeignKey('availability.id'), nullable=False)
+    booked_at = db.Column(db.DateTime, default=db.func.current_timestamp())
+    session_details = db.Column(db.Text, nullable=True)
+    session_notes = db.Column(db.Text, nullable=True)
+    status = db.Column(db.String(50), default='Upcoming')
+    end_time = db.Column(db.DateTime, nullable=False)
+    user = db.relationship('User', backref='bookings')
 @app.route('/')
 def index():
     if 'username' in session:
         user = User.query.filter_by(username=session['username']).first()
+        if 'user_id' not in session:
+            session['user_id'] = user.id  # Ensure user_id is set in the session
         return render_template('user_hub.html', username=session['username'], user=user)
     return redirect('/login')
 
@@ -52,6 +74,7 @@ def login():
         user = User.query.filter_by(username=username).first()
         if user and user.check_password(password):
             session['username'] = username
+            session['user_id'] = user.id  # Store user_id in the session
             return redirect('/')
         return 'Invalid username or password'
     return render_template('login.html')
@@ -115,6 +138,9 @@ def manage_user(user_id):
     if 'username' not in session or not User.query.filter_by(username=session['username'], is_admin=True).first():
         return redirect('/login')
     user = User.query.get(user_id)
+    upcoming_sessions = Booking.query.filter_by(user_id=user.id, status='Upcoming').all()
+    passed_sessions = Booking.query.filter_by(user_id=user.id, status='Passed').all()
+    cancelled_sessions = Booking.query.filter_by(user_id=user.id, status='Cancelled').all()
     if request.method == 'POST':
         action = request.form['action']
         if action == 'update_user':
@@ -128,8 +154,12 @@ def manage_user(user_id):
             user.order_history = request.form['order_history']
             db.session.commit()
             flash('Order history updated successfully.')
-    return render_template('manage_user.html', user=user)
-
+        elif action == 'update_notes':
+            user.private_notes = request.form['private_notes']
+            user.public_notes = request.form['public_notes']
+            db.session.commit()
+            flash('Notes updated successfully.')
+    return render_template('manage_user.html', user=user, upcoming_sessions=upcoming_sessions, passed_sessions=passed_sessions, cancelled_sessions=cancelled_sessions)
 @app.route('/admin/manage_content', methods=['GET', 'POST'])
 def manage_content():
     if 'username' not in session or not User.query.filter_by(username=session['username'], is_admin=True).first():
@@ -307,6 +337,90 @@ def set_password(token):
         flash('Password set successfully. You can now log in.')
         return redirect(url_for('login'))
     return render_template('set_password.html', token=token)
+@app.route('/book_session', methods=['GET', 'POST'])
+def book_session():
+    if 'username' not in session:
+        return redirect('/login')
+    if request.method == 'POST':
+        availability_id = request.form['availability_id']
+        availability = Availability.query.get(availability_id)
+        if availability and not availability.is_booked:
+            end_time = datetime.combine(availability.date, availability.end_time)
+            booking = Booking(user_id=session['user_id'], availability_id=availability_id, end_time=end_time)
+            availability.is_booked = True
+            db.session.add(booking)
+            db.session.commit()
+            flash('Session booked successfully.')
+        else:
+            flash('Selected time slot is already booked.')
+    availabilities = Availability.query.filter_by(is_booked=False).all()
+    return render_template('book_session.html', availabilities=availabilities)
+@app.route('/admin/manage_session/<int:booking_id>', methods=['GET', 'POST'])
+def manage_session(booking_id):
+    if 'username' not in session or not User.query.filter_by(username=session['username'], is_admin=True).first():
+        return redirect('/login')
+    booking = Booking.query.get(booking_id)
+    if request.method == 'POST':
+        action = request.form['action']
+        if action == 'update_details':
+            booking.session_details = request.form['session_details']
+            db.session.commit()
+            flash('Session details updated successfully.')
+        elif action == 'update_notes':
+            booking.session_notes = request.form['session_notes']
+            db.session.commit()
+            flash('Session notes updated successfully.')
+        elif action == 'check_in':
+            booking.status = 'Checked In'
+            db.session.commit()
+            flash('User checked in successfully.')
+        elif action == 'check_out':
+            booking.status = 'Checked Out'
+            db.session.commit()
+            flash('User checked out successfully.')
+        elif action == 'cancel':
+            booking.status = 'Cancelled'
+            db.session.commit()
+            flash('Session cancelled successfully.')
+        elif action == 'mark_passed':
+            booking.status = 'Passed'
+            db.session.commit()
+            flash('Session marked as passed.')
+    return render_template('manage_session.html', booking=booking)
+@app.route('/admin/set_availability', methods=['GET', 'POST'])
+def set_availability():
+    if 'username' not in session or not User.query.filter_by(username=session['username'], is_admin=True).first():
+        return redirect('/login')
+    if request.method == 'POST':
+        try:
+            date_str = request.form['date']
+            start_time_str = request.form['start_time']
+            end_time_str = request.form['end_time']
+
+            # Convert strings to date and time objects
+            date = datetime.strptime(date_str, '%Y-%m-%d').date()
+            start_time = datetime.strptime(start_time_str, '%H:%M').time()
+            end_time = datetime.strptime(end_time_str, '%H:%M').time()
+
+            print(f"Received data - Date: {date}, Start Time: {start_time}, End Time: {end_time}")  # Debug print
+            availability = Availability(date=date, start_time=start_time, end_time=end_time)
+            db.session.add(availability)
+            db.session.commit()
+            flash('Availability set successfully.')
+        except Exception as e:
+            print(f"Error: {e}")  # Debug print
+            flash('An error occurred while setting availability.')
+            db.session.rollback()  # Rollback the session to handle the error
+    availabilities = Availability.query.all()
+    return render_template('set_availability.html', availabilities=availabilities)
+@app.route('/user_sessions')
+def user_sessions():
+    if 'username' not in session:
+        return redirect('/login')
+    user = User.query.filter_by(username=session['username']).first()
+    upcoming_sessions = Booking.query.filter_by(user_id=user.id, status='Upcoming').all()
+    passed_sessions = Booking.query.filter_by(user_id=user.id, status='Passed').all()
+    return render_template('user_sessions.html', upcoming_sessions=upcoming_sessions, passed_sessions=passed_sessions)
 
 @app.route('/admin/generate_invoice', methods=['GET', 'POST'])
 def generate_invoice():
@@ -345,7 +459,17 @@ def generate_invoice():
     else:
         users = User.query.all()
         return render_template('generate_invoice.html', users=users)
-
+@app.route('/user_sessions/update_details/<int:booking_id>', methods=['POST'])
+def update_details(booking_id):
+    if 'username' not in session:
+        return redirect('/login')
+    booking = Booking.query.get(booking_id)
+    if booking and booking.user_id == session['user_id']:
+        if request.form['action'] == 'update_details':
+            booking.session_details = request.form['session_details']
+            db.session.commit()
+            flash('Session details updated successfully.')
+    return redirect(url_for('user_sessions'))
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
@@ -354,5 +478,4 @@ if __name__ == '__main__':
             owner_user.set_password('10')
             db.session.add(owner_user)
             db.session.commit()
-    socketio.run(app, host='0.0.0.0', port=5000)
-    
+    socketio.run(app, host='0.0.0.0', port=5000, debug=True)

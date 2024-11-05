@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Manage Session</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Manage Session</h1>
+        <h2>Session on {{ booking.availability.date }} from {{ booking.availability.start_time }} to {{ booking.availability.end_time }}</h2>
+        <p>Status: {{ booking.status }}</p>
+        <form action="/admin/manage_session/{{ booking.id }}" method="post">
+            <input type="hidden" name="action" value="update_details">
+            <div class="form-group">
+                <label for="session_details">Session Details</label>
+                <textarea class="form-control" id="session_details" name="session_details" rows="3">{{ booking.session_details }}</textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Update Details</button>
+        </form>
+        <form action="/admin/manage_session/{{ booking.id }}" method="post">
+            <input type="hidden" name="action" value="update_notes">
+            <div class="form-group">
+                <label for="session_notes">Session Notes</label>
+                <textarea class="form-control" id="session_notes" name="session_notes" rows="3">{{ booking.session_notes }}</textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Update Notes</button>
+        </form>
+        <form action="/admin/manage_session/{{ booking.id }}" method="post">
+            <input type="hidden" name="action" value="check_in">
+            <button type="submit" class="btn btn-success">Check In</button>
+        </form>
+        <form action="/admin/manage_session/{{ booking.id }}" method="post">
+            <input type="hidden" name="action" value="check_out">
+            <button type="submit" class="btn btn-warning">Check Out</button>
+        </form>
+        <form action="/admin/manage_session/{{ booking.id }}" method="post">
+            <input type="hidden" name="action" value="cancel">
+            <button type="submit" class="btn btn-danger">Cancel Session</button>
+        </form>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+</body>
+</html>

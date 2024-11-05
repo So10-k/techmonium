@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Your Sessions</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Your Sessions</h1>
+        <h2>Upcoming Sessions</h2>
+        <ul class="list-group">
+            {% for booking in upcoming_sessions %}
+            <li class="list-group-item">
+                <h5>Session on {{ booking.availability.date }} from {{ booking.availability.start_time }} to {{ booking.availability.end_time }}</h5>
+                <p>Status: {{ booking.status }}</p>
+                <p>Details: {{ booking.session_details or 'No details provided' }}</p>
+                <form action="/user_sessions/update_details/{{ booking.id }}" method="post">
+                    <input type="hidden" name="action" value="update_details">
+                    <div class="form-group">
+                        <label for="session_details">Update Session Details</label>
+                        <textarea class="form-control" id="session_details" name="session_details" rows="3">{{ booking.session_details }}</textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Update Details</button>
+                </form>
+            </li>
+            {% endfor %}
+        </ul>
+        <h2>Passed Sessions</h2>
+        <ul class="list-group">
+            {% for booking in passed_sessions %}
+            <li class="list-group-item">
+                <h5>Session on {{ booking.availability.date }} from {{ booking.availability.start_time }} to {{ booking.availability.end_time }}</h5>
+                <p>Status: {{ booking.status }}</p>
+                <p>Details: {{ booking.session_details or 'No details provided' }}</p>
+                <p>Notes: {{ booking.session_notes or 'No notes provided' }}</p>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+</body>
+</html>

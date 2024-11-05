@@ -6,44 +6,160 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
 </head>
 <body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="/">Techmonium Hub</a>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/user_hub">User Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/admin/manage_users">Admin</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/logout">Logout</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
     <div class="container">
         <h1>Manage User: {{ user.username }}</h1>
-        <form action="/admin/manage_user/{{ user.id }}" method="post">
-            <input type="hidden" name="action" value="update_user">
-            <div class="form-group">
-                <label for="username">Username</label>
-                <input type="text" class="form-control" id="username" name="username" value="{{ user.username }}" required>
+        <ul class="nav nav-tabs" id="manageUserTabs" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" id="details-tab" data-toggle="tab" href="#details" role="tab" aria-controls="details" aria-selected="true">Details</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="notes-tab" data-toggle="tab" href="#notes" role="tab" aria-controls="notes" aria-selected="false">Notes</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="sessions-tab" data-toggle="tab" href="#sessions" role="tab" aria-controls="sessions" aria-selected="false">Sessions</a>
+            </li>
+        </ul>
+        <div class="tab-content" id="manageUserTabsContent">
+            <div class="tab-pane fade show active" id="details" role="tabpanel" aria-labelledby="details-tab">
+                <form action="/admin/manage_user/{{ user.id }}" method="post">
+                    <input type="hidden" name="action" value="update_user">
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" class="form-control" id="username" name="username" value="{{ user.username }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" value="{{ user.email }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="subscription_plan">Subscription Plan</label>
+                        <select name="subscription_plan" class="form-control" required>
+                            <option value="No Plan Purchased" {% if user.subscription_plan == 'No Plan Purchased' %}selected{% endif %}>No Plan Purchased</option>
+                            <option value="Platinum Plan" {% if user.subscription_plan == 'Platinum Plan' %}selected{% endif %}>Platinum Plan</option>
+                            <option value="Family Plan" {% if user.subscription_plan == 'Family Plan' %}selected{% endif %}>Family Plan</option>
+                            <option value="Testing Plan" {% if user.subscription_plan == 'Testing Plan' %}selected{% endif %}>Testing Plan</option>
+                            <option value="Employee" {% if user.subscription_plan == 'Employee' %}selected{% endif %}>Employee</option>
+                            <option value="Friend" {% if user.subscription_plan == 'Friend' %}selected{% endif %}>Friend</option>
+                        </select>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="is_admin" name="is_admin" {% if user.is_admin %}checked{% endif %}>
+                        <label class="form-check-label" for="is_admin">Admin</label>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Update User</button>
+                </form>
+                <h2>Order History</h2>
+                <form action="/admin/manage_user/{{ user.id }}" method="post">
+                    <input type="hidden" name="action" value="update_order_history">
+                    <div class="form-group">
+                        <label for="order_history">Order History</label>
+                        <textarea class="form-control" id="order_history" name="order_history" rows="10">{{ user.order_history }}</textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Update Order History</button>
+                </form>
             </div>
-            <div class="form-group">
-                <label for="email">Email</label>
-                <input type="email" class="form-control" id="email" name="email" value="{{ user.email }}" required>
+            <div class="tab-pane fade" id="notes" role="tabpanel" aria-labelledby="notes-tab">
+                <h2>Notes</h2>
+                <form action="/admin/manage_user/{{ user.id }}" method="post">
+                    <input type="hidden" name="action" value="update_notes">
+                    <div class="form-group">
+                        <label for="private_notes">Private Notes</label>
+                        <textarea class="form-control" id="private_notes" name="private_notes" rows="5">{{ user.private_notes }}</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="public_notes">Public Notes</label>
+                        <textarea class="form-control" id="public_notes" name="public_notes" rows="5">{{ user.public_notes }}</textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Update Notes</button>
+                </form>
             </div>
-            <div class="form-group">
-                <label for="subscription_plan">Subscription Plan</label>
-                <select name="subscription_plan" class="form-control" required>
-                    <option value="No Plan Purchased" {% if user.subscription_plan == 'No Plan Purchased' %}selected{% endif %}>No Plan Purchased</option>
-                    <option value="Platinum Plan" {% if user.subscription_plan == 'Platinum Plan' %}selected{% endif %}>Platinum Plan</option>
-                    <option value="Family Plan" {% if user.subscription_plan == 'Family Plan' %}selected{% endif %}>Family Plan</option>
-                    <option value="Testing Plan" {% if user.subscription_plan == 'Testing Plan' %}selected{% endif %}>Testing Plan</option>
-                    <option value="Employee" {% if user.subscription_plan == 'Employee' %}selected{% endif %}>Employee</option>
-                    <option value="Friend" {% if user.subscription_plan == 'Friend' %}selected{% endif %}>Friend</option>
-                </select>
+            <div class="tab-pane fade" id="sessions" role="tabpanel" aria-labelledby="sessions-tab">
+                <h2>Upcoming Sessions</h2>
+                <ul class="list-group">
+                    {% for booking in upcoming_sessions %}
+                    <li class="list-group-item">
+                        <h5>Session on {{ booking.availability.date }} from {{ booking.availability.start_time }} to {{ booking.availability.end_time }}</h5>
+                        <p>Status: {{ booking.status }}</p>
+                        <p>Details: {{ booking.session_details or 'No details provided' }}</p>
+                        <form action="/admin/manage_session/{{ booking.id }}" method="post">
+                            <input type="hidden" name="action" value="update_details">
+                            <div class="form-group">
+                                <label for="session_details">Update Session Details</label>
+                                <textarea class="form-control" id="session_details" name="session_details" rows="3">{{ booking.session_details }}</textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Update Details</button>
+                        </form>
+                        <form action="/admin/manage_session/{{ booking.id }}" method="post">
+                            <input type="hidden" name="action" value="update_notes">
+                            <div class="form-group">
+                                <label for="session_notes">Update Session Notes</label>
+                                <textarea class="form-control" id="session_notes" name="session_notes" rows="3">{{ booking.session_notes }}</textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Update Notes</button>
+                        </form>
+                        <form action="/admin/manage_session/{{ booking.id }}" method="post">
+                            <input type="hidden" name="action" value="check_in">
+                            <button type="submit" class="btn btn-success">Check In</button>
+                        </form>
+                        <form action="/admin/manage_session/{{ booking.id }}" method="post">
+                            <input type="hidden" name="action" value="check_out">
+                            <button type="submit" class="btn btn-warning">Check Out</button>
+                        </form>
+                        <form action="/admin/manage_session/{{ booking.id }}" method="post">
+                            <input type="hidden" name="action" value="cancel">
+                            <button type="submit" class="btn btn-danger">Cancel Session</button>
+                        </form>
+                        <form action="/admin/manage_session/{{ booking.id }}" method="post">
+                            <input type="hidden" name="action" value="mark_passed">
+                            <button type="submit" class="btn btn-secondary">Mark as Passed</button>
+                        </form>
+                    </li>
+                    {% endfor %}
+                </ul>
+                <h2>Passed Sessions</h2>
+                <ul class="list-group">
+                    {% for booking in passed_sessions %}
+                    <li class="list-group-item">
+                        <h5>Session on {{ booking.availability.date }} from {{ booking.availability.start_time }} to {{ booking.availability.end_time }}</h5>
+                        <p>Status: {{ booking.status }}</p>
+                        <p>Details: {{ booking.session_details or 'No details provided' }}</p>
+                        <p>Notes: {{ booking.session_notes or 'No notes provided' }}</p>
+                    </li>
+                    {% endfor %}
+                </ul>
+                <h2>Cancelled Sessions</h2>
+                <ul class="list-group">
+                    {% for booking in cancelled_sessions %}
+                    <li class="list-group-item">
+                        <h5>Session on {{ booking.availability.date }} from {{ booking.availability.start_time }} to {{ booking.availability.end_time }}</h5>
+                        <p>Status: {{ booking.status }}</p>
+                        <p>Details: {{ booking.session_details or 'No details provided' }}</p>
+                        <p>Notes: {{ booking.session_notes or 'No notes provided' }}</p>
+                    </li>
+                    {% endfor %}
+                </ul>
             </div>
-            <div class="form-check">
-                <input type="checkbox" class="form-check-input" id="is_admin" name="is_admin" {% if user.is_admin %}checked{% endif %}>
-                <label class="form-check-label" for="is_admin">Admin</label>
-            </div>
-            <button type="submit" class="btn btn-primary">Update User</button>
-        </form>
-        <h2>Order History</h2>
-        <form action="/admin/manage_user/{{ user.id }}" method="post">
-            <input type="hidden" name="action" value="update_order_history">
-            <div class="form-group">
-                <label for="order_history">Order History</label>
-                <textarea class="form-control" id="order_history" name="order_history" rows="10">{{ user.order_history }}</textarea>
-            </div>
-            <button type="submit" class="btn btn-primary">Update Order History</button>
-        </form>
+        </div>
     </div>
+    
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 </body>
 </html>
